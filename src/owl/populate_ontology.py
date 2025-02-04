@@ -56,7 +56,7 @@ def populate_ontology(onto_uri: str):
 
             person.has_age = [random.randint(18, 80)]
 
-            # Assegna a questa persona uno o più corsi casuali (ad esempio, 1-5 corsi)
+            # Assegna a questa persona uno o più corsi casuali
             num_courses_for_person = random.randint(1, 5)
             person_courses = random.sample(courses, num_courses_for_person)
             person.takes.extend(person_courses)
