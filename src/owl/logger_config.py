@@ -1,5 +1,4 @@
 import logging
-import os
 
 def setup_logger(name: str, log_file: str, level=logging.INFO):
     """Configura un logger che scrive sia su file che sulla console."""

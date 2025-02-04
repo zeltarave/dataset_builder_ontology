@@ -4,11 +4,9 @@ from dataset_generator import extract_features, build_dataset
 from populate_ontology import populate_ontology
 
 def main():
-    ontology_path = os.path.join("data", "large_ontology.owl")
-    
     # Popola l'ontologia con dati generati automaticamente
     print("Popolamento dell'ontologia...")
-    populate_ontology(ontology_path)
+    ontology_path = populate_ontology()
 
     # Carica l'ontologia
     print("Caricamento dell'ontologia...")

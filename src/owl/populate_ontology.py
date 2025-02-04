@@ -4,11 +4,15 @@ import random, os
 
 fake = Faker("it_IT")
 
-def populate_ontology(onto_uri: str):
+def populate_ontology():
     """
     Popola un'ontologia con dati casuali per scopi dimostrativi.
     """
-    onto = get_ontology(onto_uri)
+
+    onto_path = os.path.join("data", "large_ontology.owl")
+    file = open(onto_path, 'w')
+    file.close()
+    onto = get_ontology("file://" + onto_path).load()
 
     with onto:
         class Person(Thing):
@@ -69,6 +73,6 @@ def populate_ontology(onto_uri: str):
             persons.append(person)
 
     # --- Salvataggio dell'Ontologia ---
-    output_file = os.path.join("data", "large_ontology.owl")
-    onto.save(file=output_file, format="rdfxml")
-    print(f"Ontologia creata e salvata in '{output_file}' con {num_persons} persone e {num_courses} corsi.")
+    onto.save(file=onto_path, format="rdfxml")
+    print(f"Ontologia creata e salvata in '{onto_path}' con {num_persons} persone e {num_courses} corsi.")
+    return onto_path
