@@ -1,5 +1,5 @@
 from owlready2 import get_ontology, sync_reasoner
-from logger_config import setup_logger
+from owl.logger_config import setup_logger
 
 logger = setup_logger("ontology_manager", "log/ontology_manager.log")
 

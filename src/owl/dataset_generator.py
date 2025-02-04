@@ -1,5 +1,5 @@
 import pandas as pd
-from logger_config import setup_logger
+from owl.logger_config import setup_logger
 
 logger = setup_logger("dataset_generator", "log/dataset_generator.log")
 
