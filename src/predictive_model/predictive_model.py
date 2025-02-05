@@ -41,17 +41,17 @@ def train_predictive_model(dataset_path, random_state=42):
     X_test_scaled = scaler.transform(X_test)
     
     # Addestriamo un modello di regressione logistica
-    model = LogisticRegression(random_state=random_state)
+    model = LogisticRegression(random_state=random_state, max_iter=1000)
     model.fit(X_train_scaled, y_train)
     
-    # Effettuiamo le predizioni sul test set
     y_pred = model.predict(X_test_scaled)
+
+    acc = accuracy_score(y_test, y_pred)
+    report = classification_report(y_test, y_pred, zero_division=0)
     
-    # Valutiamo le prestazioni del modello
-    accuracy = accuracy_score(y_test, y_pred)
-    report = classification_report(y_test, y_pred)
-    
-    print("Accuracy:", accuracy)
-    print("Classification Report:\n", report)
-    
-    return model, scaler, report
+    return model, scaler, acc, report
+
+def format_result(acc, report):
+    result += f"Accuracy: {acc:.4f}\n"
+    result += "Classification Report:\n" + report
+    return result

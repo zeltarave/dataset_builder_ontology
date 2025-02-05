@@ -2,12 +2,12 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Ontology Dataset Builder</title>
+    <title>Valutazione Modello</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
 </head>
 <body class="container mt-4">
-    <h1>Ontology Dataset Builder</h1>
-    
+    <h1>Risultati dell'Addestramento del Modello</h1>
+    <!-- Messaggi flash -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="mt-3">
@@ -19,11 +19,10 @@
         </div>
       {% endif %}
     {% endwith %}
-    
-    <div class="list-group mt-4">
-        <a href="{{ url_for('populate') }}" class="list-group-item list-group-item-action">Popola Ontologia</a>
-        <a href="{{ url_for('extract') }}" class="list-group-item list-group-item-action">Estrai Dataset</a>
-        <a href="{{ url_for('train') }}" class="list-group-item list-group-item-action">Addestra Modello Predittivo</a>
+    <div class="mt-4">
+        <!-- Mostra il report di valutazione in un blocco preformattato -->
+        <pre>{{ report }}</pre>
     </div>
+    <a href="{{ url_for('index') }}" class="btn btn-primary mt-4">Torna alla Home</a>
 </body>
 </html>

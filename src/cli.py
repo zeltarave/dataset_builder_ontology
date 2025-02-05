@@ -2,6 +2,7 @@ import argparse
 import os
 from predictive_model.predictive_model import train_predictive_model
 from predictive_model.grid_search_model import train_with_grid_search
+from predictive_model.compare_model import compare_models
 from owl.ontology_manager import OntologyManager
 
 def cli_main():
@@ -22,6 +23,9 @@ def cli_main():
 
     # Comando per addestrare il modello con GridSearchCV
     parser_grid_search = subparsers.add_parser("grid_search", help="Addestra il modello predittivo utilizzando Grid Search con cross-validation")
+
+    # Comando per confrontare i modelli
+    parser_compare = subparsers.add_parser("compare_base_grid", help="Confronta le prestazioni tra il modello base e quello con Grid Search")
 
     args = parser.parse_args()
 
@@ -50,13 +54,22 @@ def cli_main():
 
     elif args.command == "train":
         print("Addestramento del modello predittivo...")
-        train_predictive_model(dataset_path)
+        model_base, scaler_base, acc, report_base = train_predictive_model(dataset_path)
+        print(f"Accuratezza: {acc}")
+        print(report_base)
         print("Modello addestrato e valutato.")
 
     elif args.command == "grid_search":
         print("Addestramento del modello predittivo con Grid Search...")
-        best_model = train_with_grid_search(dataset_path)
+        model_grid, acc, report = train_with_grid_search(dataset_path)
+        print(f"Accuratezza: {acc}")
+        print(report)
         print("Modello ottimizzato addestrato con successo!")
+
+    elif args.command == "compare_base_grid":
+        print("Confronto tra il modello base e il modello grid search...")
+        compare_models(dataset_path)
+        print("Confronto completato.")
     
     else:
         parser.print_help()

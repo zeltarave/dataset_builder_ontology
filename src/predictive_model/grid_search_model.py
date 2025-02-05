@@ -1,5 +1,5 @@
 import pandas as pd
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
@@ -39,6 +39,8 @@ def train_with_grid_search(dataset_path, random_state=42):
     # Seleziona le feature e il target
     X = df[['age', 'num_courses_taken']]
     y = df['teacher']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=random_state)
     
     # Crea una pipeline con scaler e regressione logistica
     pipeline = Pipeline([
@@ -61,16 +63,18 @@ def train_with_grid_search(dataset_path, random_state=42):
         n_jobs=-1               
     )
     
-    grid_search.fit(X, y)
+    grid_search.fit(X_train, y_train)
+
+    best_model = grid_search.best_estimator_
     
-    best_params = grid_search.best_params_
-    best_score = grid_search.best_score_
-    print("Migliori parametri trovati:", best_params)
-    print("Miglior punteggio di cross validation:", best_score)
+    # Effettua predizioni sul test set e calcola il report
+    y_pred = best_model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
+    report = classification_report(y_test, y_pred, zero_division=0)
     
-    # Effettua predizioni sul training set per visualizzare il report
-    y_pred = grid_search.predict(X)
-    print("Accuracy sul training set:", accuracy_score(y, y_pred))
-    print("Classification Report:\n", classification_report(y, y_pred))
-    
-    return grid_search.best_estimator_
+    return best_model, acc, report
+
+def format_result(acc, report):
+    result += f"Accuracy: {acc:.4f}\n"
+    result += "Classification Report:\n" + report
+    return result
