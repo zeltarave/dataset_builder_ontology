@@ -31,33 +31,27 @@ def evaluate_model(model, X_test, y_test, model_name="Model"):
     y_pred = model.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
     report = classification_report(y_test, y_pred)
-    print(f"--- {model_name} ---")
-    print("Accuracy sul test set:", acc)
-    print("Classification Report:\n", report)
-    print("\n")
-    return acc, report
+    
+    result = (f"--- {model_name} ---")
+    result += f"Accuracy sul test set: {acc:.4f}\n"
+    result += "Classification Report:\n", report
+    return result
 
 def compare_models(dataset_path):
     """
     Addestra due modelli predittivi (base e con GridSearchCV) e confronta le prestazioni.
     """
+    result = "Risultati del Confronto dei Modelli:\n\n"
     X, y = load_and_preprocess_dataset(dataset_path)
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     
     # Addestramento modello base
     model_base, scaler_base, acc_base, report_base = train_predictive_model(dataset_path)
     X_test_scaled = scaler_base.transform(X_test)
-    acc_base, report_base = evaluate_model(model_base, X_test_scaled, y_test, "Base Model")
+    result = evaluate_model(model_base, X_test_scaled, y_test, "Base Model")
     
     # Addestramento modello con GridSearchCV
     model_grid, acc_grid, report_grid = train_with_grid_search(dataset_path)
-    acc_grid, report_grid = evaluate_model(model_grid, X_test, y_test, "GridSearch Model")
+    result = evaluate_model(model_grid, X_test, y_test, "GridSearch Model")
     
-    result = "Risultati del Confronto dei Modelli:\n\n"
-    result += "Modello Base:\n"
-    result += f"Accuracy: {acc_base:.4f}\n"
-    result += "Classification Report:\n" + report_base + "\n\n"
-    result += "Modello con Grid Search:\n"
-    result += f"Accuracy: {acc_grid:.4f}\n"
-    result += "Classification Report:\n" + report_grid
     return result
