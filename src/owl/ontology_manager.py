@@ -35,11 +35,11 @@ class OntologyManager:
                 self.ontology = get_ontology(self.ontology_path).load()
             
             logger.info("Ontologia caricata (o creata) correttamente.")
+            return self.ontology
         except Exception as e:
             logger.error(f"Errore nel caricamento dell'ontologia: {e}", exc_info=True)
             raise
-        return self.ontology
-
+    
     def populate(self):
         """
         Popola un'ontologia con dati casuali per scopi dimostrativi.
@@ -57,26 +57,32 @@ class OntologyManager:
             class teaches(ObjectProperty):
                 domain = [Person]
                 range = [Course]
+                
 
             class takes(ObjectProperty):
                 domain = [Person]
                 range = [Course]
+                
 
             class has_age(DataProperty):
                 domain = [Person]
                 range = [int]
+                
 
             class has_name(DataProperty):
                 domain = [Person]
                 range = [str]
+                
 
             class course_title(DataProperty):
                 domain = [Course]
                 range = [str]
+                
 
             class course_description(DataProperty):
                 domain = [Course]
                 range = [str]
+                
 
             # Popolamento dell'ontologia con dati
             fake = Faker("it_IT")
@@ -121,7 +127,7 @@ class OntologyManager:
             logger.error(f"Errore durante il ragionamento: {e}", exc_info=True)
             raise
 
-    def extract_person_data(self):
+    def extract_features(self):
         """
         Estrae le informazioni rilevanti dagli individui della classe Person
         presenti nell'ontologia.
@@ -131,70 +137,53 @@ class OntologyManager:
         - Corsi seguiti (takes)
         - Corsi insegnati (teaches)
         """
-        if self.ontology is None:
-            raise ValueError("Ontologia non caricata. Caricare l'ontologia con load() prima di estrarre i dati.")
-        try:
-            Person = self.ontology.Person
-        except AttributeError:
-            print("La classe 'Person' non è stata trovata nell'ontologia. Verifica la struttura.")
-            return []
-        
         data = []
         try:
-            for person in Person.instances():
+            logger.info("Estrazione delle caratteristiche dagli individui...")
+            try:
+                Person = self.ontology.Person
+            except AttributeError:
+                print("La classe 'Person' non è stata trovata nell'ontologia. Verifica la struttura.")
+                return data
+
+            persons = list(Person.instances())
+            logger.info(f"Numero di persone trovate: {len(persons)}")
+            
+            for person in persons:
                 row = {}
                 row["name"] = person.has_name[0] if hasattr(person, "has_name") and person.has_name else None
                 row["age"] = person.has_age[0] if hasattr(person, "has_age") and person.has_age else None
-
-                # Estrazione dei corsi seguiti
+                
+                # Estrazione dei corsi seguiti 
                 if hasattr(person, "takes") and person.takes:
                     courses_taken = []
                     for course in person.takes:
-                        title = course.course_title[0] if hasattr(course, "course_title") and course.course_title else course.name
-                        courses_taken.append(title)
+                        if hasattr(course, "course_title") and course.course_title:
+                            courses_taken.append(course.course_title[0])
+                        else:
+                            courses_taken.append(course.name)
                     row["courses_taken"] = ", ".join(courses_taken)
                 else:
                     row["courses_taken"] = None
-            
+                
                 # Estrazione dei corsi insegnati
                 if hasattr(person, "teaches") and person.teaches:
                     courses_taught = []
                     for course in person.teaches:
-                        title = course.course_title[0] if hasattr(course, "course_title") and course.course_title else course.name
-                        courses_taught.append(title)
+                        if hasattr(course, "course_title") and course.course_title:
+                            courses_taught.append(course.course_title[0])
+                        else:
+                            courses_taught.append(course.name)
                     row["courses_taught"] = ", ".join(courses_taught)
                 else:
                     row["courses_taught"] = None
+                
                 data.append(row)
-            logger.info("Dati delle persone estratti con successo.")
+            
+            logger.info("Estrazione dati completata con successo.")
             return data
         except Exception as e:
             logger.error(f"Errore durante l'estrazione delle caratteristiche: {e}", exc_info=True)
-            return data
-            
-    def extract_course_data(self):
-        """
-        Estrae i dati degli individui della classe Course.
-        Restituisce una lista di dizionari contenenti titolo e descrizione.
-        """
-        if self.ontology is None:
-            raise ValueError("Ontologia non caricata.")
-        try:
-            Course = self.ontology.Course
-        except AttributeError:
-            raise ValueError("La classe 'Course' non è definita nell'ontologia.")
-
-        data = []
-        try:
-            for course in Course.instances():
-                row = {}
-                row["title"] = course.course_title[0] if hasattr(course, "course_title") and course.course_title else None
-                row["description"] = course.course_description[0] if hasattr(course, "course_description") and course.course_description else None
-                data.append(row)
-            logger.info("Dati dei corsi estratti con successo.")
-            return data
-        except Exception as e:
-            logger.error(f"Errore durante l'estrazione dei dati dei corsi: {e}", exc_info=True)
             return data
 
     def build_dataset(self, data, output_path):

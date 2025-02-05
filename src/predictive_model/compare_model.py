@@ -32,9 +32,7 @@ def evaluate_model(model, X_test, y_test, model_name="Model"):
     acc = accuracy_score(y_test, y_pred)
     report = classification_report(y_test, y_pred)
     
-    result = (f"--- {model_name} ---")
-    result += f"Accuracy sul test set: {acc:.4f}\n"
-    result += "Classification Report:\n", report
+    result = (f"--- {model_name} --- \n Accuracy sul test set: {acc:.4f} \n Classification Report:\n {report}")
     return result
 
 def compare_models(dataset_path):
@@ -48,10 +46,11 @@ def compare_models(dataset_path):
     # Addestramento modello base
     model_base, scaler_base, acc_base, report_base = train_predictive_model(dataset_path)
     X_test_scaled = scaler_base.transform(X_test)
-    result = evaluate_model(model_base, X_test_scaled, y_test, "Base Model")
+    result_base = evaluate_model(model_base, X_test_scaled, y_test, "Base Model")
     
     # Addestramento modello con GridSearchCV
     model_grid, acc_grid, report_grid = train_with_grid_search(dataset_path)
-    result = evaluate_model(model_grid, X_test, y_test, "GridSearch Model")
+    result_grid = evaluate_model(model_grid, X_test, y_test, "GridSearch Model")
     
+    result = result_base + "\n\n" + result_grid
     return result

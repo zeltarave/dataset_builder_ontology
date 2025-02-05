@@ -1,7 +1,7 @@
 import argparse
 import os
-from predictive_model.predictive_model import train_predictive_model
-from predictive_model.grid_search_model import train_with_grid_search
+from predictive_model.predictive_model import train_predictive_model, format_result
+from predictive_model.grid_search_model import train_with_grid_search, format_result
 from predictive_model.compare_model import compare_models
 from owl.ontology_manager import OntologyManager
 
@@ -35,20 +35,19 @@ def cli_main():
 
     onto = OntologyManager(ontology_path)
 
-    onto.load()
 
     if args.command == "populate":
+        onto.load()
         print("Popolamento dell'ontologia...")
         onto.populate()
         print("Ontologia popolata e salvata in", ontology_path)
 
     elif args.command == "extract":
-        print("Caricamento dell'ontologia...")
         onto.load()
         print("Esecuzione del ragionamento...")
         onto.reason()
         print("Estrazione dei dati...")
-        data = onto.extract_person_data()
+        data = onto.extract_features()
         onto.build_dataset(data, dataset_path)
         print("Dataset estratto e salvato in", dataset_path)
 
@@ -62,8 +61,8 @@ def cli_main():
     elif args.command == "grid_search":
         print("Addestramento del modello predittivo con Grid Search...")
         model_grid, acc, report = train_with_grid_search(dataset_path)
-        print(f"Accuratezza: {acc}")
-        print(report)
+        result = format_result(acc, report)
+        print(result)
         print("Modello ottimizzato addestrato con successo!")
 
     elif args.command == "compare_base_grid":

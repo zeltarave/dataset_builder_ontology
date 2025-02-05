@@ -75,6 +75,7 @@ def train_with_grid_search(dataset_path, random_state=42):
     return best_model, acc, report
 
 def format_result(acc, report):
+    result = ""
     result += f"Accuracy: {acc:.4f}\n"
     result += "Classification Report:\n" + report
     return result

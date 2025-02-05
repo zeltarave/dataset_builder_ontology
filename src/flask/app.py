@@ -40,7 +40,7 @@ def populate():
 @error_handler("Errore nell'estrazione del dataset")
 def extract():
     onto.reason()
-    data = onto.extract_person_data()
+    data = onto.extract_features()
     onto.build_dataset(data, DATASET_PATH)
 
     df = pd.read_csv(DATASET_PATH)
