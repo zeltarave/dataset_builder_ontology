@@ -1,9 +1,7 @@
 import os
 import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for, flash
-from owl.populate_ontology import populate_ontology
-from owl.ontology_manager import load_ontology, run_reasoner
-from owl.dataset_generator import extract_features, build_dataset
+from owl.ontology_manager import OntologyManager
 from predictive_model.predictive_model import train_predictive_model
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -12,8 +10,13 @@ template_dir = os.path.join(current_dir, "..", "templates")
 app = Flask(__name__, template_folder=template_dir)
 app.secret_key = "your_secret_key"  # Necessario per gestire i messaggi flash
 
-ONTOLOGY_PATH = os.path.join("data", "large_ontology.owl")
+ONTOLOGY_PATH = os.path.join("data", "ontology.owl")
+ONTOLOGY_PATH = os.path.abspath(ONTOLOGY_PATH)
 DATASET_PATH = os.path.join("data", "dataset.csv")
+
+onto = OntologyManager(ONTOLOGY_PATH)
+
+onto.load()
 
 @app.route("/")
 def index():
@@ -22,7 +25,7 @@ def index():
 @app.route("/populate")
 def populate():
     try:
-        populate_ontology()
+        onto.populate()
         flash("Ontologia popolata con successo!", "success")
     except Exception as e:
         flash(f"Errore nel popolamento: {e}", "danger")
@@ -32,10 +35,9 @@ def populate():
 def extract():
     try:
         # Carica l'ontologia e processa l'estrazione
-        onto = load_ontology("file://" + os.path.abspath(ONTOLOGY_PATH))
-        onto = run_reasoner(onto)
-        data = extract_features(onto)
-        build_dataset(data, DATASET_PATH)
+        onto.reason()
+        data = onto.extract_person_data()
+        onto.build_dataset(data, DATASET_PATH)
 
         df = pd.read_csv(DATASET_PATH)
         dataset_html = df.to_html(classes="table table-striped", index=False)

@@ -2,4 +2,5 @@ owlready2
 pandas
 Faker
 scikit-learn
+spacy
 flask

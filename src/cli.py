@@ -1,9 +1,7 @@
 import argparse
 import os
-from owl.populate_ontology import populate_ontology
-from owl.ontology_manager import load_ontology, run_reasoner
-from owl.dataset_generator import extract_features, build_dataset
 from predictive_model.predictive_model import train_predictive_model
+from owl.ontology_manager import OntologyManager
 
 def cli_main():
     parser = argparse.ArgumentParser(
@@ -21,24 +19,32 @@ def cli_main():
     # Comando per addestrare il modello predittivo
     parser_train = subparsers.add_parser("train", help="Addestra il modello predittivo sul dataset")
 
+    # Comando per estrarre le feature testuali dei corsi
+    parser_course = subparsers.add_parser("course_features", help="Estrae le feature testuali dai corsi")
+
     args = parser.parse_args()
 
-    ontology_path = os.path.join("data", "large_ontology.owl")
+    ontology_path = os.path.join("data", "ontology.owl")
+    ontology_path = os.path.abspath(ontology_path)
     dataset_path = os.path.join("data", "dataset.csv")
+
+    onto = OntologyManager(ontology_path)
+
+    onto.load()
 
     if args.command == "populate":
         print("Popolamento dell'ontologia...")
-        populate_ontology()
+        onto.populate()
         print("Ontologia popolata e salvata in", ontology_path)
 
     elif args.command == "extract":
         print("Caricamento dell'ontologia...")
-        onto = load_ontology("file://" + os.path.abspath(ontology_path))
+        onto.load()
         print("Esecuzione del ragionamento...")
-        onto = run_reasoner(onto)
+        onto.reason()
         print("Estrazione dei dati...")
-        data = extract_features(onto)
-        build_dataset(data, dataset_path)
+        data = onto.extract_person_data()
+        onto.build_dataset(data, dataset_path)
         print("Dataset estratto e salvato in", dataset_path)
 
     elif args.command == "train":
