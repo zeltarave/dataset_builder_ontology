@@ -4,3 +4,4 @@ Faker
 scikit-learn
 spacy
 flask
+flask-wtf

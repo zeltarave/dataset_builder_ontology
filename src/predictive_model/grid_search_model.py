@@ -5,7 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score
 
-def train_with_grid_search(dataset_path, random_state=42):
+def train_with_grid_search(dataset_path, train_ratio=0.7, random_state=42):
     """
     Carica il dataset, estrae le feature e il target, e utilizza GridSearchCV
     con 5-fold cross-validation per ottimizzare i parametri del modello di
@@ -40,7 +40,7 @@ def train_with_grid_search(dataset_path, random_state=42):
     X = df[['age', 'num_courses_taken']]
     y = df['teacher']
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=random_state)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=train_ratio, random_state=random_state)
     
     # Crea una pipeline con scaler e regressione logistica
     pipeline = Pipeline([

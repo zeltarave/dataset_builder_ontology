@@ -1,8 +1,11 @@
 import os
 import sys
-import pandas as pd
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, request
 from decorators import error_handler
+from flask_wtf.csrf import CSRFProtect
+from forms import DataSplitForm
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.join(current_dir, "..")
@@ -16,14 +19,13 @@ from predictive_model.compare_model import compare_models
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # Necessario per gestire i messaggi flash
+csrf = CSRFProtect(app)
 
 ONTOLOGY_PATH = os.path.join("data", "ontology.owl")
 ONTOLOGY_PATH = os.path.abspath(ONTOLOGY_PATH)
 DATASET_PATH = os.path.join("data", "dataset.csv")
 
 onto = OntologyManager(ONTOLOGY_PATH)
-
-onto.load()
 
 @app.route("/")
 def index():
@@ -32,6 +34,7 @@ def index():
 @app.route("/populate")
 @error_handler("Errore nel popolamento dell'ontologia")
 def populate():
+    onto.load()
     onto.populate()
     flash("Ontologia popolata con successo!", "success")
     return redirect(url_for("index"))
@@ -39,6 +42,7 @@ def populate():
 @app.route("/extract")
 @error_handler("Errore nell'estrazione del dataset")
 def extract():
+    onto.load()
     onto.reason()
     data = onto.extract_features()
     onto.build_dataset(data, DATASET_PATH)
@@ -49,22 +53,30 @@ def extract():
     flash("Dataset estratto e salvato con successo!", "success")
     return render_template("dataset.html", dataset_html=dataset_html)
 
-@app.route("/train")
+@app.route("/train", methods = ["GET", "POST"])
 @error_handler("Errore nell'addestramento del modello predittivo")
 def train():
-    model_base, scaler_base, acc, report_base = train_predictive_model(DATASET_PATH)
-    results = format_result(acc, report_base)
-    flash("Modello predittivo addestrato e valutato!", "success")
+    # Inserisci il form per permettere all'utente di specificare la proporzione di training set
+    form = DataSplitForm()
+    if form.validate_on_submit():
+        train_ratio = float(form.train_ratio.data)
+        model, scaler, acc, report = train_predictive_model(DATASET_PATH, train_ratio=train_ratio)
+        results = format_result(acc, report)
+        flash("Modello addestrato con successo!", "success")
+        return render_template("train.html", form=form, report=results)
+    return render_template("train.html", form=form)
 
-    return render_template("train.html", report=results)
-
-@app.route("/grid_search")
+@app.route("/grid_search", methods = ["GET", "POST"])
 @error_handler("Errore nell'addestramento del modello con Grid Search")
 def grid_search():
-    model_grid, acc, report_grid = train_with_grid_search(DATASET_PATH)
-    results = format_result(acc, report_grid)
-    flash("Modello addestrato con Grid Search!", "success")
-    return render_template("grid_search.html", report=results)
+    form = DataSplitForm()
+    if form.validate_on_submit():
+        train_ratio = float(form.train_ratio.data)
+        model, acc, report = train_with_grid_search(DATASET_PATH, train_ratio=train_ratio)
+        results = format_result(acc, report)
+        flash("Modello addestrato con Grid Search!", "success")
+        return render_template("grid_search.html", form=form, report=results)
+    return render_template("grid_search.html", form=form)
 
 @app.route("/compare")
 @error_handler("Errore nel confronto dei modelli")
@@ -73,7 +85,8 @@ def compare():
     flash("Confronto dei modelli completato!", "success")
     return render_template("compare.html", report=results)
 
+
 if __name__ == "__main__":
     if not os.path.exists("data"):
         os.makedirs("data")
-    app.run(debug=True)
+    app.run(debug=True, port=4996)

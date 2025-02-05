@@ -19,10 +19,26 @@
         </div>
       {% endif %}
     {% endwith %}
-    <div class="mt-4">
-        <!-- Mostra il report di valutazione in un blocco preformattato -->
-        <pre>{{ report }}</pre>
-    </div>
+
+    <form method="post" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <div class="form-group">
+          {{ form.train_ratio.label(class="form-label") }}
+          {{ form.train_ratio(class="form-control") }}
+      </div>
+      <div class="form-group">
+          {{ form.dataset_file.label(class="form-label") }}
+          {{ form.dataset_file(class="form-control-file") }}
+      </div>
+      <div class="form-group">
+          {{ form.submit(class="btn btn-primary") }}
+      </div>
+  </form>
+  
+  {% if report %}
+    <h3>Risultati:</h3>
+    <pre>{{ report }}</pre>
+  {% endif %}
     <a href="{{ url_for('index') }}" class="btn btn-primary mt-4">Torna alla Home</a>
 </body>
 </html>
