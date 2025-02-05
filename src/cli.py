@@ -1,6 +1,7 @@
 import argparse
 import os
 from predictive_model.predictive_model import train_predictive_model
+from predictive_model.grid_search_model import train_with_grid_search
 from owl.ontology_manager import OntologyManager
 
 def cli_main():
@@ -19,8 +20,8 @@ def cli_main():
     # Comando per addestrare il modello predittivo
     parser_train = subparsers.add_parser("train", help="Addestra il modello predittivo sul dataset")
 
-    # Comando per estrarre le feature testuali dei corsi
-    parser_course = subparsers.add_parser("course_features", help="Estrae le feature testuali dai corsi")
+    # Comando per addestrare il modello con GridSearchCV
+    parser_grid_search = subparsers.add_parser("grid_search", help="Addestra il modello predittivo utilizzando Grid Search con cross-validation")
 
     args = parser.parse_args()
 
@@ -52,6 +53,11 @@ def cli_main():
         train_predictive_model(dataset_path)
         print("Modello addestrato e valutato.")
 
+    elif args.command == "grid_search":
+        print("Addestramento del modello predittivo con Grid Search...")
+        best_model = train_with_grid_search(dataset_path)
+        print("Modello ottimizzato addestrato con successo!")
+    
     else:
         parser.print_help()
 

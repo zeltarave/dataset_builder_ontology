@@ -25,10 +25,8 @@ def train_predictive_model(dataset_path, random_state=42):
 
     df = pd.read_csv(dataset_path)
     
-    # Creiamo la variabile target: 1 se la persona insegna almeno un corso, 0 altrimenti
     df['teacher'] = df['courses_taught'].apply(lambda x: 0 if pd.isna(x) or x.strip() == "" else 1)
     
-    # Creiamo una feature aggiuntiva: il numero di corsi seguiti.
     df['num_courses_taken'] = df['courses_taken'].apply(lambda x: len(x.split(',')) if pd.notna(x) and x.strip() != "" else 0)
     
     # Selezioniamo le feature e il target
@@ -57,7 +55,3 @@ def train_predictive_model(dataset_path, random_state=42):
     print("Classification Report:\n", report)
     
     return model, scaler, report
-
-if __name__ == "__main__":
-    dataset_path = os.path.join("data", "dataset.csv")
-    train_predictive_model(dataset_path)
