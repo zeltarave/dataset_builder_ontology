@@ -9,7 +9,7 @@ logger = setup_logger("dataset_generator", "log/dataset_generator.log")
 
 
 class OntologyManager:
-    def __init__(self, ontology_path, output_path):
+    def __init__(self, ontology_path, output_path=None):
         """
         Inizializzo il manager con il percorso dell'ontonologia.
         Il percorso può essere un URI (es: file://...) o un percorso locale
@@ -149,6 +149,7 @@ class OntologyManager:
         """
 
         self.ontology = get_ontology("file://" + self.ontology_path).load()
+        self.reason()
 
         self.data = []
         try:
