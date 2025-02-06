@@ -5,6 +5,11 @@ from predictive_model.grid_search_model import train_with_grid_search, format_re
 from predictive_model.compare_model import compare_models
 from owl.ontology_manager import OntologyManager
 
+ontology_path = os.path.join("data", "ontology.owl")
+dataset_path = os.path.join("data", "dataset.csv")
+onto = OntologyManager(ontology_path, dataset_path)
+
+
 def cli_main():
     parser = argparse.ArgumentParser(
         description="Dataset Builder Ontology - Interfaccia a riga di comando"
@@ -29,27 +34,13 @@ def cli_main():
 
     args = parser.parse_args()
 
-    ontology_path = os.path.join("data", "ontology.owl")
-    ontology_path = os.path.abspath(ontology_path)
-    dataset_path = os.path.join("data", "dataset.csv")
-
-    onto = OntologyManager(ontology_path)
-
 
     if args.command == "populate":
-        onto.load()
-        print("Popolamento dell'ontologia...")
         onto.populate()
-        print("Ontologia popolata e salvata in", ontology_path)
 
     elif args.command == "extract":
-        onto.load()
-        print("Esecuzione del ragionamento...")
-        onto.reason()
-        print("Estrazione dei dati...")
-        data = onto.extract_features()
-        onto.build_dataset(data, dataset_path)
-        print("Dataset estratto e salvato in", dataset_path)
+        onto.extract_features()
+        onto.build_dataset()
 
     elif args.command == "train":
         print("Addestramento del modello predittivo...")

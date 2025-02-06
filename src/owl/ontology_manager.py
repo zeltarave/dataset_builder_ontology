@@ -9,109 +9,119 @@ logger = setup_logger("dataset_generator", "log/dataset_generator.log")
 
 
 class OntologyManager:
-    def __init__(self, ontology_path):
+    def __init__(self, ontology_path, output_path):
         """
         Inizializzo il manager con il percorso dell'ontonologia.
         Il percorso può essere un URI (es: file://...) o un percorso locale
         """
         self.ontology_path = ontology_path
+        self.data = None
+        self.output_path = output_path
         self.ontology = None
     
     def load(self):
+
         """
         Carica l'ontologia dal percorso specificato.
         Se il file non esiste, crea una nuova ontologia.
         """
-        try:
-            file_path = self.ontology_path
-            if file_path.startswith("file://"):
-                file_path = file_path[7:]
-            
-            if not os.path.exists(file_path):
-                logger.info(f"Il file {file_path} non esiste. Verrà creata una nuova ontologia.")
-                self.ontology = get_ontology(self.ontology_path)
-            else:
+        if not os.path.exists(self.ontology_path):
+            file = open(self.ontology_path, 'w')
+            file.close()
+            logger.info("Ontologia non trovata, creazione di una nuova ontologia")
+            try:
                 logger.info(f"Caricamento dell'ontologia da {self.ontology_path}...")
-                self.ontology = get_ontology(self.ontology_path).load()
-            
-            logger.info("Ontologia caricata (o creata) correttamente.")
-            return self.ontology
-        except Exception as e:
-            logger.error(f"Errore nel caricamento dell'ontologia: {e}", exc_info=True)
-            raise
+                self.ontology = get_ontology("file://" + self.ontology_path).load()
+                logger.info("Ontologia caricata correttamente.")
+                return self.ontology
+            except Exception as e:
+                logger.error(f"Errore durante il caricamento dell'ontologia: {e}", exc_info=True)
+                raise
+        else:
+            try:
+                logger.info(f"Caricamento dell'ontologia da {self.ontology_path}...")
+                self.ontology = get_ontology("file://" + self.ontology_path).load()
+                logger.info("Ontologia caricata correttamente.")
+                return self.ontology
+            except Exception as e:
+                logger.error(f"Errore durante il caricamento dell'ontologia: {e}", exc_info=True)
+                raise
     
     def populate(self):
         """
         Popola un'ontologia con dati casuali per scopi dimostrativi.
         """
-        if self.ontology is None:
-            raise ValueError("Ontologia non caricata. Caricare l'ontologia con load() prima di popolarla.")
-        
-        with self.ontology:
-            class Person(Thing):
-                pass
-
-            class Course(Thing):
-                pass
-
-            class teaches(ObjectProperty):
-                domain = [Person]
-                range = [Course]
-                
-
-            class takes(ObjectProperty):
-                domain = [Person]
-                range = [Course]
-                
-
-            class has_age(DataProperty):
-                domain = [Person]
-                range = [int]
-                
-
-            class has_name(DataProperty):
-                domain = [Person]
-                range = [str]
-                
-
-            class course_title(DataProperty):
-                domain = [Course]
-                range = [str]
-                
-
-            class course_description(DataProperty):
-                domain = [Course]
-                range = [str]
-                
-
-            # Popolamento dell'ontologia con dati
-            fake = Faker("it_IT")
-            num_courses = 50
-            courses = []
-            for i in range(1, num_courses + 1):
-                title = f"Corso {i}"
-                course = Course(f"course_{i}")
-                course.course_title = [title]
-                course.course_description = [f"Descrizione per {title}"]
-                courses.append(course)
-
-            num_persons = 1000
-            for i in range(1, num_persons + 1):
-                person = Person(f"person_{i}")
-                person.has_name = [fake.name()]
-                person.has_age = [fake.random_int(min=18, max=80)]
-                # Assegna casualmente 1-5 corsi a cui la persona è iscritta
-                person.takes.extend(random.sample(courses, k=random.randint(1, 5)))
-                # Per una percentuale delle persone, assegna anche un corso da insegnare
-                if random.random() < 0.05:
-                    person.teaches.append(random.choice(courses))
-
+        logger.info("Popolamento dell'ontologia con dati casuali...")
         try:
-            self.ontology.save(file=self.ontology_path, format="rdfxml")
-            logger.info(f"Ontologia popolata e salvata in {self.ontology_path}.")
+            self.ontology = self.load()
+            with self.ontology:
+                class Person(Thing):
+                    pass
+
+                class Course(Thing):
+                    pass
+
+                class teaches(ObjectProperty):
+                    domain = [Person]
+                    range = [Course]
+                    
+
+                class takes(ObjectProperty):
+                    domain = [Person]
+                    range = [Course]
+                    
+
+                class has_age(DataProperty):
+                    domain = [Person]
+                    range = [int]
+                    
+
+                class has_name(DataProperty):
+                    domain = [Person]
+                    range = [str]
+                    
+
+                class course_title(DataProperty):
+                    domain = [Course]
+                    range = [str]
+                    
+
+                class course_description(DataProperty):
+                    domain = [Course]
+                    range = [str]
+                    
+
+                # Popolamento dell'ontologia con dati
+                fake = Faker("it_IT")
+                num_courses = 50
+                courses = []
+                for i in range(1, num_courses + 1):
+                    title = f"Corso {i}"
+                    course = Course(f"course_{i}")
+                    course.course_title = [title]
+                    course.course_description = [f"Descrizione per {title}"]
+                    courses.append(course)
+
+                num_persons = 1000
+                for i in range(1, num_persons + 1):
+                    person = Person(f"person_{i}")
+                    person.has_name = [fake.name()]
+                    person.has_age = [fake.random_int(min=18, max=80)]
+                    # Assegna casualmente 1-5 corsi a cui la persona è iscritta
+                    person.takes.extend(random.sample(courses, k=random.randint(1, 5)))
+                    # Per una percentuale delle persone, assegna anche un corso da insegnare
+                    if random.random() < 0.05:
+                        person.teaches.append(random.choice(courses))
+            try:
+                self.ontology.save(file=self.ontology_path, format="rdfxml")
+                logger.info(f"Ontologia popolata e salvata in {self.ontology_path}.")
+            except Exception as e:
+                logger.error(f"Errore nel salvataggio dell'ontologia: {e}", exc_info=True)
+                raise
         except Exception as e:
-            logger.error(f"Errore nel salvataggio dell'ontologia: {e}", exc_info=True)
-            raise
+            logger.error(f"Errore durante il caricamento dell'ontologia: {e}", exc_info=True)
+
+
     
     def reason(self):
         """
@@ -137,7 +147,10 @@ class OntologyManager:
         - Corsi seguiti (takes)
         - Corsi insegnati (teaches)
         """
-        data = []
+
+        self.ontology = get_ontology("file://" + self.ontology_path).load()
+
+        self.data = []
         try:
             logger.info("Estrazione delle caratteristiche dagli individui...")
 
@@ -178,25 +191,24 @@ class OntologyManager:
                 else:
                     row["courses_taught"] = None
                 
-                data.append(row)
+                self.data.append(row)
             
             logger.info("Estrazione dati completata con successo.")
-            return data
         except Exception as e:
             logger.error(f"Errore durante l'estrazione delle caratteristiche: {e}", exc_info=True)
-            return data
+            
 
-    def build_dataset(self, data, output_path):
+    def build_dataset(self):
         """
         Costruisce un dataset a partire dai dati estratti e lo salva in formato CSV.
         """
-        if not data:
+        if not self.data:
             logger.warning("Nessun dato da scrivere nel dataset.")
             return
         
         try:
-            df = pd.DataFrame(data)
-            df.to_csv(output_path, index=False)
-            logger.info(f"Dataset salvato in {output_path}.")
+            df = pd.DataFrame(self.data)
+            df.to_csv(self.output_path, index=False)
+            logger.info(f"Dataset salvato in {self.output_path}.")
         except Exception as e:
             logger.error(f"Errore durante la scrittura del dataset: {e}", exc_info=True)
