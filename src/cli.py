@@ -4,6 +4,7 @@ from predictive_model.predictive_model import train_predictive_model, format_res
 from predictive_model.grid_search_model import train_with_grid_search, format_result
 from predictive_model.compare_model import compare_models
 from owl.ontology_manager import OntologyManager
+from pykeen_learner.learningKnowledge import pyKeenManager
 
 ontology_path = os.path.join("data", "ontology.owl")
 dataset_path = os.path.join("data", "dataset.csv")
@@ -30,6 +31,10 @@ def cli_main():
 
     # Comando per confrontare i modelli
     parser_compare = subparsers.add_parser("compare_base_grid", help="Confronta le prestazioni tra il modello base e quello con Grid Search")
+
+    # Comando per addestrare il modello con TransE
+    parser_compare = subparsers.add_parser("learn_graph", help="Addestra il modello utilizzando TransE")
+
 
     args = parser.parse_args()
 
@@ -58,6 +63,11 @@ def cli_main():
         print("Confronto tra il modello base e il modello grid search...")
         compare_models(dataset_path)
         print("Confronto completato.")
+
+    elif args.command == "learn_graph":
+        print("Addestramento del modello su un dataset di triple...")
+        pyKeen = pyKeenManager()
+        pyKeen.train_model()
     
     else:
         parser.print_help()
