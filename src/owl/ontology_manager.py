@@ -32,7 +32,7 @@ class OntologyManager:
                 self.ontology = get_ontology(self.ontology_path)
             else:
                 logger.info(f"Caricamento dell'ontologia da {self.ontology_path}...")
-                self.ontology = get_ontology("/Users/zeltarave/Documents/dataset_builder_ontology/data/ontology.owl").load()
+                self.ontology = get_ontology(self.ontology_path).load()
             
             logger.info("Ontologia caricata (o creata) correttamente.")
             return self.ontology
