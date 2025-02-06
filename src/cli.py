@@ -9,7 +9,6 @@ ontology_path = os.path.join("data", "ontology.owl")
 dataset_path = os.path.join("data", "dataset.csv")
 onto = OntologyManager(ontology_path, dataset_path)
 
-
 def cli_main():
     parser = argparse.ArgumentParser(
         description="Dataset Builder Ontology - Interfaccia a riga di comando"
@@ -33,7 +32,6 @@ def cli_main():
     parser_compare = subparsers.add_parser("compare_base_grid", help="Confronta le prestazioni tra il modello base e quello con Grid Search")
 
     args = parser.parse_args()
-
 
     if args.command == "populate":
         onto.populate()

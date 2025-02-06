@@ -5,6 +5,8 @@ from faker import Faker
 from owl.logger_config import setup_logger
 from owlready2 import Thing, DataProperty, ObjectProperty, get_ontology, sync_reasoner
 
+if not os.path.exists("log"):
+    os.makedirs("log", exist_ok=True)
 logger = setup_logger("dataset_generator", "log/dataset_generator.log")
 
 
