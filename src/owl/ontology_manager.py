@@ -32,7 +32,7 @@ class OntologyManager:
                 self.ontology = get_ontology(self.ontology_path)
             else:
                 logger.info(f"Caricamento dell'ontologia da {self.ontology_path}...")
-                self.ontology = get_ontology(self.ontology_path).load()
+                self.ontology = get_ontology("/Users/zeltarave/Documents/dataset_builder_ontology/data/ontology.owl").load()
             
             logger.info("Ontologia caricata (o creata) correttamente.")
             return self.ontology
@@ -140,11 +140,11 @@ class OntologyManager:
         data = []
         try:
             logger.info("Estrazione delle caratteristiche dagli individui...")
-            try:
-                Person = self.ontology.Person
-            except AttributeError:
-                print("La classe 'Person' non è stata trovata nell'ontologia. Verifica la struttura.")
-                return data
+
+            Person = self.ontology.Person
+            if Person is None:
+                logger.error("Classe Person non trovata nell'ontologia.")
+                raise ValueError("Classe Person non trovata nell'ontologia.")
 
             persons = list(Person.instances())
             logger.info(f"Numero di persone trovate: {len(persons)}")
