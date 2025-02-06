@@ -8,5 +8,4 @@ class DataSplitForm(FlaskForm):
     train_ratio = DecimalField('Training Set Ratio (0-1)', 
                                default=0.7,
                                validators=[DataRequired(), NumberRange(min=0.0, max=1.0)])
-    dataset_file = FileField('Carica un dataset CSV (opzionale)')
     submit = SubmitField('Applica modifiche')
