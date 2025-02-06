@@ -67,7 +67,8 @@ def cli_main():
     elif args.command == "learn_graph":
         print("Addestramento del modello su un dataset di triple...")
         pyKeen = pyKeenManager()
-        pyKeen.train_model()
+        pyKeen = pyKeen.train_model()
+        pyKeen.show_graphs()
     
     else:
         parser.print_help()

@@ -55,6 +55,8 @@ class OntologyManager:
         """
         logger.info("Popolamento dell'ontologia con dati casuali...")
         try:
+            if os.path.exists(self.ontology_path):
+                os.remove(self.ontology_path)
             self.ontology = self.load()
             with self.ontology:
                 class Person(Thing):

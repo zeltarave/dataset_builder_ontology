@@ -95,9 +95,12 @@ class pyKeenManager:
         id_to_entity = {v: k for k, v in entity_to_id.items()}
         self.entity_labels = [id_to_entity[i] for i in range(len(id_to_entity))]
 
-        self.pca()
-        self.tsne2D()
-        self.pca3D()
+        return self
+
+    def show_graphs(manager):
+        manager.pca().show()
+        manager.tsne2D().show()
+        manager.pca3D().show()
 
     # # --- A) Usando PCA per una visualizzazione 2D
     def pca(self):
@@ -112,7 +115,7 @@ class pyKeenManager:
         plt.xlabel("PC1")
         plt.ylabel("PC2")
         plt.grid(True)
-        plt.show()
+        return plt
 
     # --- B) Usando t-SNE per una visualizzazione 2D (può evidenziare strutture non lineari)
     def tsne2D(self):
@@ -127,7 +130,7 @@ class pyKeenManager:
         plt.xlabel("Dimensione 1")
         plt.ylabel("Dimensione 2")
         plt.grid(True)
-        plt.show()
+        return plt
 
     # --- C) Visualizzazione 3D con PCA
     def pca3D(self):
@@ -143,7 +146,7 @@ class pyKeenManager:
         ax.set_xlabel("PC1")
         ax.set_ylabel("PC2")
         ax.set_zlabel("PC3")
-        plt.show()
+        return plt
 
 if __name__ == "__main__":
     pyKeen = pyKeenManager()
