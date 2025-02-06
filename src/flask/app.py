@@ -25,7 +25,7 @@ ONTOLOGY_PATH = os.path.join("data", "ontology.owl")
 ONTOLOGY_PATH = os.path.abspath(ONTOLOGY_PATH)
 DATASET_PATH = os.path.join("data", "dataset.csv")
 
-onto = OntologyManager(ONTOLOGY_PATH)
+onto = OntologyManager(ONTOLOGY_PATH, DATASET_PATH)
 
 @app.route("/")
 def index():
@@ -42,10 +42,8 @@ def populate():
 @app.route("/extract")
 @error_handler("Errore nell'estrazione del dataset")
 def extract():
-    onto.load()
-    onto.reason()
-    data = onto.extract_features()
-    onto.build_dataset(data, DATASET_PATH)
+    onto.extract_features()
+    onto.build_dataset()
 
     df = pd.read_csv(DATASET_PATH)
     dataset_html = df.to_html(classes="table table-striped", index=False)
