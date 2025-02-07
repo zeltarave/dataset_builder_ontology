@@ -58,7 +58,6 @@ def extract():
 @app.route("/train", methods = ["GET", "POST"])
 @error_handler("Errore nell'addestramento del modello predittivo")
 def train():
-    # Inserisci il form per permettere all'utente di specificare la proporzione di training set
     form = DataSplitForm()
     if form.validate_on_submit():
         train_ratio = float(form.train_ratio.data)
@@ -80,17 +79,20 @@ def grid_search():
         return render_template("grid_search.html", form=form, report=results)
     return render_template("grid_search.html", form=form)
 
-@app.route("/compare")
+@app.route("/compare", methods = ["GET", "POST"])
 @error_handler("Errore nel confronto dei modelli")
 def compare():
-    results = compare_models(DATASET_PATH)
-    flash("Confronto dei modelli completato!", "success")
-    return render_template("compare.html", report=results)
+    form = DataSplitForm()
+    if form.validate_on_submit():
+        train_ratio = float(form.train_ratio.data)
+        results = compare_models(DATASET_PATH, train_ratio=train_ratio)
+        flash("Modelli addestrati con successo!", "success")
+        return render_template("train.html", form=form, report=results)
+    return render_template("train.html", form=form)
 
 
 @app.route("/plot")
 def plot():
-
     # Addestra il modello
     manager = pyKeenManager().train_model()
 
