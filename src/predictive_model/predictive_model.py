@@ -19,7 +19,22 @@ def train_predictive_model(dataset_path, train_ratio=0.7, random_state=42):
     df['num_courses_taken'] = df['courses_taken'].apply(
         lambda x: len(x.split(',')) if pd.notna(x) and x.strip() != "" else 0
     )
-    X = df[['age', 'num_courses_taken']]
+
+    df['random_noise'] = df['random_noise'].apply(lambda x: float(x))
+    df['random_noise1'] = df['random_noise1'].apply(lambda x: float(x))
+    df['random_noise2'] = df['random_noise2'].apply(lambda x: float(x))
+    df['random_noise3'] = df['random_noise3'].apply(lambda x: float(x))
+
+    # Feature non lineari
+    df['age_squared'] = df['age'] ** 2
+    df['age_interaction'] = df['age'] * df['num_courses_taken']
+
+    random_category_dummies = pd.get_dummies(df['random_category'], prefix='cat')
+
+    # Seleziona le feature e il target
+    X = df[['age', 'num_courses_taken', 'age_squared', 'age_interaction',
+            'random_noise', 'random_noise1', 'random_noise2', 'random_noise3']]
+    X = pd.concat([X, random_category_dummies], axis=1)
     y = df['teacher']
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=train_ratio, random_state=random_state)
     
@@ -27,7 +42,7 @@ def train_predictive_model(dataset_path, train_ratio=0.7, random_state=42):
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
     
-    model = LogisticRegression(random_state=random_state, max_iter=1000)
+    model = LogisticRegression(random_state=random_state, max_iter=1000, class_weight='balanced')
     model.fit(X_train_scaled, y_train)
     
     y_pred = model.predict(X_test_scaled)

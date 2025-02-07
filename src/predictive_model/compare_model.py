@@ -19,7 +19,21 @@ def load_and_preprocess_dataset(dataset_path):
         lambda x: len(x.split(',')) if pd.notna(x) and x.strip() != "" else 0
     )
     
-    X = df[['age', 'num_courses_taken']]
+    df['random_noise'] = df['random_noise'].apply(lambda x: float(x))
+    df['random_noise1'] = df['random_noise1'].apply(lambda x: float(x))
+    df['random_noise2'] = df['random_noise2'].apply(lambda x: float(x))
+    df['random_noise3'] = df['random_noise3'].apply(lambda x: float(x))
+
+    # Feature non lineari
+    df['age_squared'] = df['age'] ** 2
+    df['age_interaction'] = df['age'] * df['num_courses_taken']
+
+    random_category_dummies = pd.get_dummies(df['random_category'], prefix='cat')
+
+    # Seleziona le feature e il target
+    X = df[['age', 'num_courses_taken', 'age_squared', 'age_interaction',
+            'random_noise', 'random_noise1', 'random_noise2', 'random_noise3']]
+    X = pd.concat([X, random_category_dummies], axis=1)
     y = df['teacher']
     return X, y
 
@@ -35,13 +49,13 @@ def evaluate_model(model, X_test, y_test, model_name="Model"):
     result = (f"--- {model_name} --- \n Accuracy sul test set: {acc:.4f} \n Classification Report:\n {report}")
     return result
 
-def compare_models(dataset_path):
+def compare_models(dataset_path, train_ratio=0.7, random_state=42):
     """
     Addestra due modelli predittivi (base e con GridSearchCV) e confronta le prestazioni.
     """
     result = "Risultati del Confronto dei Modelli:\n\n"
     X, y = load_and_preprocess_dataset(dataset_path)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=train_ratio, random_state=random_state)
     
     # Addestramento modello base
     model_base, scaler_base, acc_base, report_base = train_predictive_model(dataset_path)

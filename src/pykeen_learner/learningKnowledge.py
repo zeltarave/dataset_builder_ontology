@@ -82,7 +82,7 @@ class pyKeenManager:
             training=tf_train,
             testing=tf_test,
             validation=tf_valid,
-            model="TransE",  # ad es., usa il modello TransE
+            model="TransE",
             training_kwargs=dict(num_epochs=100),
         )
         print(result)

@@ -94,6 +94,24 @@ class OntologyManager:
                     domain = [Course]
                     range = [str]
                     
+                class random_noise(DataProperty):
+                    domain = [Person]
+                    range = [float]
+                
+                class random_noise1(DataProperty):
+                    domain = [Person]
+                    range = [float]
+
+                class random_noise2(DataProperty):
+                    domain = [Person]
+                    range = [float]
+
+                class random_noise3(DataProperty):
+                    domain = [Person]
+                    range = [float]
+                class random_category(DataProperty):
+                    domain = [Person]
+                    range = [str]
 
                 # Popolamento dell'ontologia con dati
                 fake = Faker("it_IT")
@@ -111,10 +129,15 @@ class OntologyManager:
                     person = Person(f"person_{i}")
                     person.has_name = [fake.name()]
                     person.has_age = [fake.random_int(min=18, max=80)]
+                    person.random_noise = [random.uniform(-100, 100)]
+                    person.random_noise1 = [random.uniform(-100, 100)]
+                    person.random_noise2 = [random.uniform(-100, 100)]
+                    person.random_noise3 = [random.uniform(-100, 100)]
+                    person.random_category = [random.choice(["A", "B", "C", "D"])]
                     # Assegna casualmente 1-5 corsi a cui la persona è iscritta
                     person.takes.extend(random.sample(courses, k=random.randint(1, 5)))
                     # Per una percentuale delle persone, assegna anche un corso da insegnare
-                    if random.random() < 0.05:
+                    if random.random() < 0.01:
                         person.teaches.append(random.choice(courses))
             try:
                 self.ontology.save(file=self.ontology_path, format="rdfxml")
@@ -171,7 +194,11 @@ class OntologyManager:
                 row = {}
                 row["name"] = person.has_name[0] if hasattr(person, "has_name") and person.has_name else None
                 row["age"] = person.has_age[0] if hasattr(person, "has_age") and person.has_age else None
-                
+                row["random_noise"] = person.random_noise[0] if hasattr(person, "random_noise") and person.random_noise else None
+                row["random_noise1"] = person.random_noise1[0] if hasattr(person, "random_noise1") and person.random_noise1 else None
+                row["random_noise2"] = person.random_noise2[0] if hasattr(person, "random_noise2") and person.random_noise2 else None
+                row["random_noise3"] = person.random_noise3[0] if hasattr(person, "random_noise3") and person.random_noise3 else None
+                row["random_category"] = person.random_category[0] if hasattr(person, "random_category") and person.random_category else None
                 # Estrazione dei corsi seguiti 
                 if hasattr(person, "takes") and person.takes:
                     courses_taken = []
@@ -195,6 +222,7 @@ class OntologyManager:
                     row["courses_taught"] = ", ".join(courses_taught)
                 else:
                     row["courses_taught"] = None
+                
                 
                 self.data.append(row)
             

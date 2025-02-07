@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -36,8 +37,21 @@ def train_with_grid_search(dataset_path, train_ratio=0.7, random_state=42):
         lambda x: len(x.split(',')) if pd.notna(x) and x.strip() != "" else 0
     )
     
+    df['random_noise'] = df['random_noise'].apply(lambda x: float(x))
+    df['random_noise1'] = df['random_noise1'].apply(lambda x: float(x))
+    df['random_noise2'] = df['random_noise2'].apply(lambda x: float(x))
+    df['random_noise3'] = df['random_noise3'].apply(lambda x: float(x))
+
+    # Feature non lineari
+    df['age_squared'] = df['age'] ** 2
+    df['age_interaction'] = df['age'] * df['num_courses_taken']
+
+    random_category_dummies = pd.get_dummies(df['random_category'], prefix='cat')
+
     # Seleziona le feature e il target
-    X = df[['age', 'num_courses_taken']]
+    X = df[['age', 'num_courses_taken', 'age_squared', 'age_interaction',
+            'random_noise', 'random_noise1', 'random_noise2', 'random_noise3']]
+    X = pd.concat([X, random_category_dummies], axis=1)
     y = df['teacher']
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=train_ratio, random_state=random_state)
@@ -45,22 +59,28 @@ def train_with_grid_search(dataset_path, train_ratio=0.7, random_state=42):
     # Crea una pipeline con scaler e regressione logistica
     pipeline = Pipeline([
         ('scaler', StandardScaler()),
-        ('clf', LogisticRegression(random_state=random_state, max_iter=1000))
+        ('clf', LogisticRegression(random_state=random_state, max_iter=1000, class_weight='balanced'))
     ])
     
-    param_grid = {
-        'clf__C': [0.01, 0.1, 1, 10, 100],
-        'clf__penalty': ['l1', 'l2'],
-        'clf__solver': ['liblinear']  
-    }
+    param_grid = [
+        {
+            'clf__C': np.logspace(-5, 5, 11),
+            'clf__penalty': ['l1'],
+            'clf__solver': ['liblinear', 'saga']
+        },
+        {
+            'clf__C': np.logspace(-5, 5, 11),
+            'clf__penalty': ['l2'],
+            'clf__solver': ['liblinear', 'saga', 'newton-cg', 'lbfgs']
+        }
+    ]
     
-    # Configura GridSearchCV
     grid_search = GridSearchCV(
         pipeline,
         param_grid,
-        cv=5,                    # 5-fold cross-validation
-        scoring='accuracy',      
-        n_jobs=-1               
+        cv=5,
+        scoring='balanced_accuracy',
+        n_jobs=-1
     )
     
     grid_search.fit(X_train, y_train)
