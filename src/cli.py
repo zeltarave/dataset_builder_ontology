@@ -61,7 +61,8 @@ def cli_main():
 
     elif args.command == "compare_base_grid":
         print("Confronto tra il modello base e il modello grid search...")
-        compare_models(dataset_path)
+        results = compare_models(dataset_path)
+        print(results)
         print("Confronto completato.")
 
     elif args.command == "learn_graph":

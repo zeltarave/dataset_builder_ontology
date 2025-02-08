@@ -44,18 +44,18 @@ def evaluate_model(model, X_test, y_test, model_name="Model"):
     """
     y_pred = model.predict(X_test)
     acc = accuracy_score(y_test, y_pred)
-    report = classification_report(y_test, y_pred)
+    report = classification_report(y_test, y_pred, zero_division=0)
     
     result = (f"--- {model_name} --- \n Accuracy sul test set: {acc:.4f} \n Classification Report:\n {report}")
     return result
 
-def compare_models(dataset_path, train_ratio=0.7, random_state=42):
+def compare_models(dataset_path, test_size=0.7, random_state=42):
     """
     Addestra due modelli predittivi (base e con GridSearchCV) e confronta le prestazioni.
     """
     result = "Risultati del Confronto dei Modelli:\n\n"
     X, y = load_and_preprocess_dataset(dataset_path)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=train_ratio, random_state=random_state)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
     
     # Addestramento modello base
     model_base, scaler_base, acc_base, report_base = train_predictive_model(dataset_path)

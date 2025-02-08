@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score
 
 
-def train_predictive_model(dataset_path, train_ratio=0.7, random_state=42):
+def train_predictive_model(dataset_path, test_size=0.7, random_state=42):
     """
     Addestra il modello predittivo base utilizzando il dataset.
     Se esistono file di suddivisione, li utilizza, altrimenti suddivide il dataset.
@@ -36,7 +36,7 @@ def train_predictive_model(dataset_path, train_ratio=0.7, random_state=42):
             'random_noise', 'random_noise1', 'random_noise2', 'random_noise3']]
     X = pd.concat([X, random_category_dummies], axis=1)
     y = df['teacher']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=train_ratio, random_state=random_state)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
     
     scaler = StandardScaler()
     X_train_scaled = scaler.fit_transform(X_train)

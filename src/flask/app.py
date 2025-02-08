@@ -60,8 +60,8 @@ def extract():
 def train():
     form = DataSplitForm()
     if form.validate_on_submit():
-        train_ratio = float(form.train_ratio.data)
-        model, scaler, acc, report = train_predictive_model(DATASET_PATH, train_ratio=train_ratio)
+        test_size = float(form.train_ratio.data)
+        model, scaler, acc, report = train_predictive_model(DATASET_PATH, test_size=test_size)
         results = format_result(acc, report)
         flash("Modello addestrato con successo!", "success")
         return render_template("train.html", form=form, report=results)
@@ -72,8 +72,8 @@ def train():
 def grid_search():
     form = DataSplitForm()
     if form.validate_on_submit():
-        train_ratio = float(form.train_ratio.data)
-        model, acc, report = train_with_grid_search(DATASET_PATH, train_ratio=train_ratio)
+        test_size = float(form.train_ratio.data)
+        model, acc, report = train_with_grid_search(DATASET_PATH, test_size=test_size)
         results = format_result(acc, report)
         flash("Modello addestrato con Grid Search!", "success")
         return render_template("grid_search.html", form=form, report=results)
@@ -84,8 +84,8 @@ def grid_search():
 def compare():
     form = DataSplitForm()
     if form.validate_on_submit():
-        train_ratio = float(form.train_ratio.data)
-        results = compare_models(DATASET_PATH, train_ratio=train_ratio)
+        test_size = float(form.train_ratio.data)
+        results = compare_models(DATASET_PATH, test_size=test_size)
         flash("Modelli addestrati con successo!", "success")
         return render_template("train.html", form=form, report=results)
     return render_template("train.html", form=form)
@@ -111,8 +111,6 @@ def plot():
     manager.pca3D().savefig(buf, format="png")
     pca3D = base64.b64encode(buf.getvalue()).decode("utf-8")
     buf.seek(0)
-    
-
     
     # Passa l'immagine codificata al template
     return render_template("plot.html", image_pca2D=pca2D, image_tsne2D=tsne2D, image_pca3D=pca3D)
