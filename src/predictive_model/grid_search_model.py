@@ -6,7 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score
 
-def train_with_grid_search(dataset_path, test_size=0.7, random_state=42):
+def train_with_grid_search(dataset_path, random_state=42):
     """
     Carica il dataset, estrae le feature e il target, e utilizza GridSearchCV
     con 5-fold cross-validation per ottimizzare i parametri del modello di
@@ -79,6 +79,7 @@ def train_with_grid_search(dataset_path, test_size=0.7, random_state=42):
     ]
 
     outer_scores = []
+    outer_reports = []
     fold = 0
 
 
@@ -105,16 +106,22 @@ def train_with_grid_search(dataset_path, test_size=0.7, random_state=42):
 
         acc = accuracy_score(y_test, y_pred)
         outer_scores.append(acc)
-        print(f"Accuracy per il fold {fold}: {acc:.4f}")
-        print(classification_report(y_test, y_pred, zero_division=0))
+        report = classification_report(y_test, y_pred, zero_division=0)
+        outer_reports.append(report)
+        
     
     mean_acc = np.mean(outer_scores)
-    print(f"Mean accuracy: {mean_acc:.4f}")
     std_acc = np.std(outer_scores)
-    print(f"Standard deviation: {std_acc:.4f}")
+    
 
-def format_result(acc, report):
+    return best_model, outer_scores, outer_reports, mean_acc, std_acc
+
+def format_result_grid(outer_scores, outer_reports, mean_acc, std_acc):
     result = ""
-    result += f"Accuracy: {acc:.4f}\n"
-    result += "Classification Report:\n" + report
+    for i in range(len(outer_scores)):
+        result += f"Accuracy per il fold {i}: {outer_scores[i]:.4f}\n"
+        result += f"Classification Report per il fold {i}\n {outer_reports[i]}"
+        result += "\n"
+    result += f"Mean accuracy: {mean_acc:.4f}\n"
+    result += f"Standard deviation: {std_acc:.4f}\n"
     return result

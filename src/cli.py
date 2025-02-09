@@ -1,7 +1,7 @@
 import argparse
 import os
-from predictive_model.predictive_model import train_predictive_model, format_result
-from predictive_model.grid_search_model import train_with_grid_search, format_result
+from predictive_model.predictive_model import train_predictive_model, format_result_predictive
+from predictive_model.grid_search_model import train_with_grid_search, format_result_grid
 from predictive_model.compare_model import compare_models
 from owl.ontology_manager import OntologyManager
 from pykeen_learner.learningKnowledge import pyKeenManager

@@ -17,8 +17,8 @@ if parent_dir not in sys.path:
 
 from pykeen_learner.learningKnowledge import pyKeenManager
 from owl.ontology_manager import OntologyManager
-from predictive_model.predictive_model import train_predictive_model, format_result
-from predictive_model.grid_search_model import train_with_grid_search, format_result
+from predictive_model.predictive_model import train_predictive_model, format_result_predictive
+from predictive_model.grid_search_model import train_with_grid_search, format_result_grid
 from predictive_model.compare_model import compare_models
 
 app = Flask(__name__)
@@ -62,7 +62,7 @@ def train():
     if form.validate_on_submit():
         test_size = float(form.train_ratio.data)
         model, scaler, acc, report = train_predictive_model(DATASET_PATH, test_size=test_size)
-        results = format_result(acc, report)
+        results = format_result_predictive(acc, report)
         flash("Modello addestrato con successo!", "success")
         return render_template("train.html", form=form, report=results)
     return render_template("train.html", form=form)
@@ -70,25 +70,17 @@ def train():
 @app.route("/grid_search", methods = ["GET", "POST"])
 @error_handler("Errore nell'addestramento del modello con Grid Search")
 def grid_search():
-    form = DataSplitForm()
-    if form.validate_on_submit():
-        test_size = float(form.train_ratio.data)
-        model, acc, report = train_with_grid_search(DATASET_PATH, test_size=test_size)
-        results = format_result(acc, report)
-        flash("Modello addestrato con Grid Search!", "success")
-        return render_template("grid_search.html", form=form, report=results)
-    return render_template("grid_search.html", form=form)
+    best_model, outer_scores, outer_reports, mean_acc, std_acc = train_with_grid_search(DATASET_PATH)
+    results = format_result_grid(outer_scores, outer_reports, mean_acc, std_acc)
+    flash("Modello addestrato con Grid Search!", "success")
+    return render_template("grid_search.html", report=results)
 
-@app.route("/compare", methods = ["GET", "POST"])
+@app.route("/compare")
 @error_handler("Errore nel confronto dei modelli")
 def compare():
-    form = DataSplitForm()
-    if form.validate_on_submit():
-        test_size = float(form.train_ratio.data)
-        results = compare_models(DATASET_PATH, test_size=test_size)
-        flash("Modelli addestrati con successo!", "success")
-        return render_template("train.html", form=form, report=results)
-    return render_template("train.html", form=form)
+    results = compare_models(DATASET_PATH)
+    flash("Modelli addestrati con successo!", "success")
+    return render_template("compare.html", report=results)
 
 
 @app.route("/plot")

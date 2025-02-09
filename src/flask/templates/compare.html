@@ -19,17 +19,6 @@
         </div>
       {% endif %}
     {% endwith %}
-
-    <form method="post" enctype="multipart/form-data">
-      {{ form.hidden_tag() }}
-      <div class="form-group">
-          {{ form.train_ratio.label(class="form-label") }}
-          {{ form.train_ratio(class="form-control", step=0.1) }}
-      </div>
-      <div class="form-group">
-          {{ form.submit(class="btn btn-primary") }}
-      </div>
-  </form>
   
     <div class="mt-4">
         <!-- Mostra il report di valutazione in un blocco preformattato -->
