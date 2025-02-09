@@ -52,7 +52,7 @@ def train_predictive_model(dataset_path, test_size=0.7, random_state=42):
     return model, scaler, acc, report
 
 
-def format_result(acc, report):
+def format_result_predictive(acc, report):
     result = ""
     result += f"Accuracy: {acc:.4f}\n"
     result += "Classification Report:\n" + report
