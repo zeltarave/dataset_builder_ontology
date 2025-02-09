@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.model_selection import StratifiedKFold, GridSearchCV, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
@@ -54,19 +54,22 @@ def train_with_grid_search(dataset_path, test_size=0.7, random_state=42):
     X = pd.concat([X, random_category_dummies], axis=1)
     y = df['teacher']
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
-    
+    outer_cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+    inner_cv = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
+
     # Crea una pipeline con scaler e regressione logistica
     pipeline = Pipeline([
         ('scaler', StandardScaler()),
         ('clf', LogisticRegression(random_state=random_state, max_iter=1000, class_weight='balanced'))
     ])
     
+
     param_grid = [
         {
             'clf__C': np.logspace(-5, 5, 11),
             'clf__penalty': ['l1'],
-            'clf__solver': ['liblinear', 'saga']
+            'clf__solver': ['liblinear','saga']
         },
         {
             'clf__C': np.logspace(-5, 5, 11),
@@ -74,25 +77,41 @@ def train_with_grid_search(dataset_path, test_size=0.7, random_state=42):
             'clf__solver': ['liblinear', 'saga', 'newton-cg', 'lbfgs']
         }
     ]
-    
-    grid_search = GridSearchCV(
-        pipeline,
-        param_grid,
-        cv=5,
-        scoring='balanced_accuracy',
-        n_jobs=-1
-    )
-    
-    grid_search.fit(X_train, y_train)
 
-    best_model = grid_search.best_estimator_
+    outer_scores = []
+    fold = 0
+
+
+    for train_idx, test_idx in outer_cv.split(X, y):
+        fold += 1
+        print(f"Fold {fold}")
+        
+        X_train, X_test = X.iloc[train_idx], X.iloc[test_idx]
+        y_train, y_test = y.iloc[train_idx], y.iloc[test_idx]
     
-    # Effettua predizioni sul test set e calcola il report
-    y_pred = best_model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    report = classification_report(y_test, y_pred, zero_division=0)
+
+        grid_search = GridSearchCV(
+            estimator=pipeline,
+            param_grid=param_grid,
+            cv=inner_cv,
+            scoring='balanced_accuracy',
+            n_jobs=-1
+        )
+        
+        grid_search.fit(X_train, y_train)
+        best_model = grid_search.best_estimator_
+        
+        y_pred = best_model.predict(X_test)
+
+        acc = accuracy_score(y_test, y_pred)
+        outer_scores.append(acc)
+        print(f"Accuracy per il fold {fold}: {acc:.4f}")
+        print(classification_report(y_test, y_pred, zero_division=0))
     
-    return best_model, acc, report
+    mean_acc = np.mean(outer_scores)
+    print(f"Mean accuracy: {mean_acc:.4f}")
+    std_acc = np.std(outer_scores)
+    print(f"Standard deviation: {std_acc:.4f}")
 
 def format_result(acc, report):
     result = ""

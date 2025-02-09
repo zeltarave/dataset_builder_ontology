@@ -54,9 +54,7 @@ def cli_main():
 
     elif args.command == "grid_search":
         print("Addestramento del modello predittivo con Grid Search...")
-        model_grid, acc, report = train_with_grid_search(dataset_path)
-        result = format_result(acc, report)
-        print(result)
+        train_with_grid_search(dataset_path)
         print("Modello ottimizzato addestrato con successo!")
 
     elif args.command == "compare_base_grid":
